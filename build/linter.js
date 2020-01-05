@@ -1,22 +1,73 @@
-/*const json = `{
-    "block": "warning",
+const json = `{
+    "block": "grid",
+    "mods": {
+        "m-columns": "10"
+    },
     "content": [
-        { "block": "text", "mods": { "size": "l" } },
-        { "block": "button", "mods": { "size": "s" } }
+        {
+            "block": "grid",
+            "elem": "fraction",
+            "elemMods": {
+                "m-col": "2"
+            },
+            "content": [
+                {
+                    "block": "payment"
+                }
+            ]
+        },
+        {
+            "block": "grid",
+            "elem": "fraction",
+            "elemMods": {
+                "m-col": "8"
+            },
+            "content": [
+                {
+                    "block": "offer"
+                }
+            ]
+        }
     ]
-}`;*/
+ }`;
 
 function lint(string) {
     let errors = [];
     let object = JSON.parse(string);
+    
     if(object.block == 'warning') {
         errors = lintWarning(object, errors, string);
     }
-    //console.log(errors);
+    if(object.block == 'grid') {
+        errors = lintGrid(object.content, object.mods['m-columns'], errors, string);
+    }
     console.log(errors[0].location);
     return errors;
 }
 
+function lintGrid(content, gridSize, errors, str){
+    let marketing = 0;
+    let marketingBlocks = ['commercial', 'offer'];
+    let infoBlocks = ['payment', 'warning', 'product', 'history', 'cover', 'collect', 'articles', 'subscribtion', 'event'];
+    content.forEach(item => {
+        if(item.elem == 'fraction') {
+            if(marketingBlocks.includes(item.content[0].block)){
+                marketing += +item.elemMods['m-col'];
+            }
+        }
+    });
+    if(marketing > gridSize / 2) {
+        errors.push({
+            "code": "GRID.TOO_MUCH_MARKETING_BLOCKS",
+            "error": "Маркетинговые блоки не могут занимать больше половины от всех колонок блока grid",
+            "location": {
+                "start": { "column": 1, "line": 1 },
+                "end": { "column": 2, "line": str.split('\n').length }
+            }
+        });
+    }
+    return errors;
+}   
 
 function lintWarning(object, errors, str){
     let textSize;
@@ -38,7 +89,6 @@ function lintWarning(object, errors, str){
                             "end": { "column": 2, "line": str.split('\n').length }
                         }
                     });
-                    //str.length - str.lastIndexOf('}')
                 }
             });
         }
@@ -122,20 +172,5 @@ function lintWarningPlaceholder(placeholder, errors, str) {
     }
     return errors;
 }
-/*
-lint(json);
 
-
-
-[
-    {
-        "code": "WARNING.TEXT_SIZES_SHOULD_BE_EQUAL",
-        "error": "Тексты в блоке warning должны быть одного размера",
-        "location": {
-            "start": { "column": 1, "line": 1 },
-            "end": { "column": 2, "line": 22 }
-        }
-    }
-]
-
-*/
+//lint(json);
