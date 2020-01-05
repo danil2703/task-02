@@ -1,3 +1,5 @@
+import { object } from "prop-types";
+
 const json = `{
     "block": "warning",
     "content": [
@@ -32,7 +34,7 @@ function lint(string) {
 }
 
 function lintMain(object, errors, string){
-    let h1 = false;
+    let h1 = false, h2 = fasle;
     console.log(object.block);
     switch(object.block){
         case 'warning':
@@ -41,12 +43,57 @@ function lintMain(object, errors, string){
         case 'grid':
             errors = lintGrid(object.content, object.mods['m-columns'], errors, string);
             break;
+        case 'text': 
+            errors = lintText(h1, h2, errors);
+            break;
         default:
             if(object.content) {
                 object.content.forEach(item=>{
                     error = lintMain(item, errors, string);
                 });
             }
+    }
+    return errors;
+}
+
+function lintText(h1, h2, errors){
+    if(object.mods.type === 'h1') {
+        if(h1) {
+            errors.push({
+                "code": "TEXT.SEVERAL_H1",
+                "error": "Заголовок первого уровня на странице должен быть единственным",
+                "location": {
+                    "start": { "column": 1, "line": 1 },
+                    "end": { "column": 2, "line": 12 }
+                }
+            });
+        }
+        h1 = true;
+    }
+    if(object.mods.type === 'h2') {
+        h2 = true;
+        if(!h1) {
+            errors.push({
+                "code": "TEXT.INVALID_H2_POSITION",
+                "error": "Заголовок второго уровня не может находиться перед заголовком первого уровня",
+                "location": {
+                    "start": { "column": 1, "line": 1 },
+                    "end": { "column": 2, "line": 12 }
+                }
+            });
+        }
+    }
+    if(object.mods.type === 'h3') {
+        if(!h2) {
+            errors.push({
+                "code": "TEXT.INVALID_H3_POSITION",
+                "error": "Заголовок третьего уровня не может находиться перед заголовком второго уровня",
+                "location": {
+                    "start": { "column": 1, "line": 1 },
+                    "end": { "column": 2, "line": 12 }
+                }
+            });
+        }
     }
     return errors;
 }
