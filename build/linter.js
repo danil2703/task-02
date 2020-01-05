@@ -21,7 +21,7 @@ const json = `{
     ]
 }`;
 
-lint(json);
+//lint(json);
 
 function lint(string) {
     let object = JSON.parse(string);
