@@ -1,47 +1,53 @@
 const json = `{
-    "block": "grid",
-    "mods": {
-        "m-columns": "10"
-    },
+    "block": "warning",
     "content": [
         {
-            "block": "grid",
-            "elem": "fraction",
-            "elemMods": {
-                "m-col": "2"
-            },
-            "content": [
-                {
-                    "block": "payment"
-                }
-            ]
+            "block": "placeholder",
+            "mods": { "size": "m" }
         },
         {
-            "block": "grid",
-            "elem": "fraction",
-            "elemMods": {
-                "m-col": "8"
-            },
+            "elem": "content",
             "content": [
                 {
-                    "block": "offer"
+                    "block": "text",
+                    "mods": { "size": "m" }
+                },
+                {
+                    "block": "text",
+                    "mods": { "size": "l" }
                 }
             ]
         }
     ]
- }`;
+}`;
+
+lint(json);
 
 function lint(string) {
-    let errors = [];
     let object = JSON.parse(string);
-    
-    if(object.block == 'warning') {
-        errors = lintWarning(object, errors, string);
+    let errors = [];
+    errors = lintMain(object, errors, string);
+    console.log(errors);
+    return errors;
+}
+
+function lintMain(object, errors, string){
+    let h1 = false;
+    console.log(object.block);
+    switch(object.block){
+        case 'warning':
+            errors = lintWarning(object, errors, string);
+            break;
+        case 'grid':
+            errors = lintGrid(object.content, object.mods['m-columns'], errors, string);
+            break;
+        default:
+            if(object.content) {
+                object.content.forEach(item=>{
+                    error = lintMain(item, errors, string);
+                });
+            }
     }
-    if(object.block == 'grid') {
-        errors = lintGrid(object.content, object.mods['m-columns'], errors, string);
-    }
-    console.log(errors[0].location);
     return errors;
 }
 
@@ -172,5 +178,3 @@ function lintWarningPlaceholder(placeholder, errors, str) {
     }
     return errors;
 }
-
-//lint(json);
