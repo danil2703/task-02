@@ -1,10 +1,10 @@
-const json = `{
+/*const json = `{
     "block": "warning",
     "content": [
         { "block": "text", "mods": { "size": "l" } },
         { "block": "button", "mods": { "size": "s" } }
     ]
-}`;
+}`;*/
 
 function lint(string) {
     let errors = [];
@@ -122,10 +122,10 @@ function lintWarningPlaceholder(placeholder, errors, str) {
     }
     return errors;
 }
-
+/*
 lint(json);
 
-/*
+
 
 [
     {
