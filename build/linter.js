@@ -1,5 +1,3 @@
-import { object } from "prop-types";
-
 const json = `{
     "block": "warning",
     "content": [
@@ -23,7 +21,7 @@ const json = `{
     ]
 }`;
 
-//lint(json);
+lint(json);
 
 function lint(string) {
     let object = JSON.parse(string);
@@ -34,7 +32,7 @@ function lint(string) {
 }
 
 function lintMain(object, errors, string){
-    let h1 = false, h2 = fasle;
+    let h1 = false, h2 = false;
     console.log(object.block);
     switch(object.block){
         case 'warning':
