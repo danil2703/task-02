@@ -1,12 +1,13 @@
-/*const json = `{
-    "block": "warning",
-    "content": [
-        { "block": "text", "mods": { "size": "l" } },
-        { "block": "text", "mods": { "size": "m" } },
-        { "block": "placeholder", "mods": { "size": "m" } },
-        { "block": "button", "mods": { "size": "m" } }
-    ]
-}`;
+/*const json = `[
+    {
+        "block": "text",
+        "mods": { "type": "h2" }
+    },
+    {
+        "block": "text",
+        "mods": { "type": "h3" }
+    }
+]`;
 lint(json);*/
 
 function lint(string) {
@@ -15,12 +16,17 @@ function lint(string) {
     let headers = {h1: false, h2: false};
     let textInfo = {firstBlock: false, firstText: false, textSize: false};
     errors = lintMain(object, errors, string, headers, textInfo);
-    console.log(errors);
+    if(!headers.h1) {
+        for(let i = 0; i < errors.length; i++) {
+            if(errors[i].code == 'TEXT.INVALID_H2_POSITION') {
+                errors.splice(i, 1);
+            }
+        }
+    }
     return errors;
 }
 
 function lintMain(object, errors, string, headers, textInfo){
-    console.log(object.block);
     switch(object.block){
         case 'warning':
             object.content.forEach(item=> {
@@ -83,7 +89,7 @@ function lintText(object, headers, errors){
         }
     }
     if(object.mods.type === 'h3') {
-        if(!headers.h2 || !headers.h1) {
+        if(!headers.h2) {
             errors.push({
                 "code": "TEXT.INVALID_H3_POSITION",
                 "error": "Заголовок третьего уровня не может находиться перед заголовком второго уровня",
@@ -122,7 +128,6 @@ function lintGrid(content, gridSize, errors, str){
 }   
 
 function lintWarning(object, errors, str, textInfo){
-    console.log(textInfo);
     if(object.content) {
         object.content.forEach(item => {
             errors = lintWarning(item, errors, str, textInfo);
@@ -189,7 +194,6 @@ function lintWarningButton(button, textInfo, errors, str) {
 }
 // 03
 function lintWarningWhoFirst(textInfo, errors, str) {
-    console.log(textInfo.firstBlock);
     if(textInfo.firstBlock === 'error') {
         let line, column;
         str.split('\n').forEach((item, index) => {
