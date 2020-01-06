@@ -1,10 +1,6 @@
 /*const json = `[
     {
         "block": "text",
-        "mods": { "type": "h2" }
-    },
-    {
-        "block": "text",
         "mods": { "type": "h3" }
     }
 ]`;
@@ -23,6 +19,14 @@ function lint(string) {
             }
         }
     }
+    if(!headers.h2) {
+        for(let i = 0; i < errors.length; i++) {
+            if(errors[i].code == 'TEXT.INVALID_H3_POSITION') {
+                errors.splice(i, 1);
+            }
+        }
+    }
+    console.log(errors);
     return errors;
 }
 
