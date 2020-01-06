@@ -1,9 +1,14 @@
-const json = `{
-    "block": "warning",
-    "content": [
-        { "block": "placeholder", "mods": { "size": "xl" } }
-    ]
-}`;
+const json = `[
+    {
+        "block": "text",
+        "mods": { "type": "h1" }
+    },
+
+    {
+        "block": "text",
+        "mods": { "type": "h1" }
+    }
+]`;
 
 //lint(json);
 
@@ -11,7 +16,7 @@ function lint(string) {
     let object = JSON.parse(string);
     let errors = [];
     let headers = {h1: false, h2: false};
-    let textInfo = {firstBlock: false, firstText: false, textSize: ''};
+    let textInfo = {firstBlock: false, firstText: false, textSize: false};
     errors = lintMain(object, errors, string, headers, textInfo);
     console.log(errors);
     return errors;
@@ -33,15 +38,20 @@ function lintMain(object, errors, string, headers, textInfo){
             break;
         default:
             if(Array.isArray(object.content)) {
-                object.content.forEach(item=>{
+                object.content.forEach(item => {
                     error = lintMain(item, errors, string, headers, textInfo);
                 });
             }
             else {
                 if(typeof(object.content) === 'object') {
                     for(key in object.content) {
-                        error = lintMain(object.content[key], errors, string, headers);
+                        error = lintMain(object.content[key], errors, string, headers, textInfo);
                     }
+                }
+                if(Array.isArray(object)) {
+                    object.forEach(item => {
+                        error = lintMain(item, errors, string, headers, textInfo);
+                    });
                 }
             }
     }
@@ -160,8 +170,7 @@ function lintWarningButton(button, textSize, errors, str) {
             trueSize = arr[index+1];
         }
     });
-    console.log(textSize);
-    console.log(trueSize);
+    console.log(button.mods.size);
     if(button.mods.size !== trueSize) {
         str.split('\n').forEach((item, index) => {
             if(item.indexOf('button') !== -1) {
