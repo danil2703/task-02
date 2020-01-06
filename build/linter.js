@@ -1,15 +1,9 @@
-const json = `[
-    {
-        "block": "text",
-        "mods": { "type": "h1" }
-    },
-
-    {
-        "block": "text",
-        "mods": { "type": "h1" }
-    }
-]`;
-
+const json = `{
+    "block": "warning",
+    "content": [
+        { "block": "placeholder", "mods": { "size": "xl" } }
+    ]
+}`;
 //lint(json);
 
 function lint(string) {
@@ -150,27 +144,28 @@ function lintWarning(object, errors, str, textInfo){
             }
         }
         if(object.block == 'placeholder') {
-            errors = lintWarningPlaceholder(object, errors, str);
-            textInfo.firstBlock = 'placeholder';
+            errors = lintWarningPlaceholder(object, textInfo, errors, str);
         }
         if(object.block === 'button') {
-            error = lintWarningButton(object, textInfo.textSize, errors, str);
-            error = lintWarningWhoFirst(textInfo, errors, str);
+            error = lintWarningButton(object, textInfo, errors, str);
         }
     }
+    error = lintWarningWhoFirst(textInfo, errors, str);
     return errors;
 }
 
 // 02
-function lintWarningButton(button, textSize, errors, str) {
+function lintWarningButton(button, textInfo, errors, str) {
     let sizes = ['s', 'm', 'l', 'xl', 'xxl'];
     let line, column, trueSize;
+    if(!textInfo.firstBlock) {
+        textInfo.firstBlock = 'button';
+    }
     sizes.forEach((item, index, arr) => {
-        if(item === textSize) {
+        if(item === textInfo.textSize) {
             trueSize = arr[index+1];
         }
     });
-    console.log(button.mods.size);
     if(button.mods.size !== trueSize) {
         str.split('\n').forEach((item, index) => {
             if(item.indexOf('button') !== -1) {
@@ -191,7 +186,8 @@ function lintWarningButton(button, textSize, errors, str) {
 }
 // 03
 function lintWarningWhoFirst(textInfo, errors, str) {
-    if(!textInfo.firstBlock) {
+    console.log(textInfo.firstBlock);
+    if(textInfo.firstBlock === 'error') {
         let line, column;
         str.split('\n').forEach((item, index) => {
             if(item.indexOf('button') !== -1) {
@@ -211,10 +207,12 @@ function lintWarningWhoFirst(textInfo, errors, str) {
     return errors;
 }
 // 04
-function lintWarningPlaceholder(placeholder, errors, str) {
+function lintWarningPlaceholder(placeholder, textInfo, errors, str) {
     let size = placeholder.mods.size;
     let line, column;
-    
+    if(textInfo.firstBlock === 'button') {
+        textInfo.firstBlock = 'error';
+    }
     if(size !== 's' && size !== 'm' && size !== 'l') {
         str.split('\n').forEach((item, index) => {
             if(item.indexOf('placeholder') !== -1) {
