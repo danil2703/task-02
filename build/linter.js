@@ -1,10 +1,13 @@
-const json = `{
+/*const json = `{
     "block": "warning",
     "content": [
-        { "block": "placeholder", "mods": { "size": "xl" } }
+        { "block": "text", "mods": { "size": "l" } },
+        { "block": "text", "mods": { "size": "m" } },
+        { "block": "placeholder", "mods": { "size": "m" } },
+        { "block": "button", "mods": { "size": "m" } }
     ]
 }`;
-//lint(json);
+lint(json);*/
 
 function lint(string) {
     let object = JSON.parse(string);
@@ -166,7 +169,7 @@ function lintWarningButton(button, textInfo, errors, str) {
             trueSize = arr[index+1];
         }
     });
-    if(button.mods.size !== trueSize) {
+    if(button.mods.size !== trueSize && textInfo.textSize !== false) {
         str.split('\n').forEach((item, index) => {
             if(item.indexOf('button') !== -1) {
                 line = index + 1;
