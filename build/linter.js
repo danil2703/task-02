@@ -26,13 +26,13 @@ const json = `{
 function lint(string) {
     let object = JSON.parse(string);
     let errors = [];
-    errors = lintMain(object, errors, string);
+    let headers = {h1: false, h2: false};
+    errors = lintMain(object, errors, string, headers);
     console.log(errors);
     return errors;
 }
 
-function lintMain(object, errors, string){
-    let h1 = false, h2 = false;
+function lintMain(object, errors, string, headers){
     console.log(object.block);
     switch(object.block){
         case 'warning':
@@ -42,21 +42,28 @@ function lintMain(object, errors, string){
             errors = lintGrid(object.content, object.mods['m-columns'], errors, string);
             break;
         case 'text': 
-            errors = lintText(h1, h2, errors);
+            errors = lintText(headers, errors);
             break;
         default:
-            if(object.content) {
+            if(Array.isArray(object.content)) {
                 object.content.forEach(item=>{
-                    error = lintMain(item, errors, string);
+                    error = lintMain(item, errors, string, headers);
                 });
+            }
+            else {
+                if(typeof(object.content) === 'object') {
+                    for(key in object.content) {
+                        error = lintMain(object.content[key], errors, string, headers);
+                    }
+                }
             }
     }
     return errors;
 }
 
-function lintText(h1, h2, errors){
+function lintText(headers, errors){
     if(object.mods.type === 'h1') {
-        if(h1) {
+        if(headers.h1) {
             errors.push({
                 "code": "TEXT.SEVERAL_H1",
                 "error": "Заголовок первого уровня на странице должен быть единственным",
@@ -66,11 +73,11 @@ function lintText(h1, h2, errors){
                 }
             });
         }
-        h1 = true;
+        headers.h1 = true;
     }
     if(object.mods.type === 'h2') {
-        h2 = true;
-        if(!h1) {
+        headers.h2 = true;
+        if(!headers.h1) {
             errors.push({
                 "code": "TEXT.INVALID_H2_POSITION",
                 "error": "Заголовок второго уровня не может находиться перед заголовком первого уровня",
@@ -82,7 +89,7 @@ function lintText(h1, h2, errors){
         }
     }
     if(object.mods.type === 'h3') {
-        if(!h2) {
+        if(!headers.h2) {
             errors.push({
                 "code": "TEXT.INVALID_H3_POSITION",
                 "error": "Заголовок третьего уровня не может находиться перед заголовком второго уровня",
