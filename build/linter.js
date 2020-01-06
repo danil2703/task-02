@@ -86,7 +86,7 @@ function lintText(object, headers, errors){
         }
     }
     if(object.mods.type === 'h3') {
-        if(!headers.h2) {
+        if(!headers.h2 || !headers.h1) {
             errors.push({
                 "code": "TEXT.INVALID_H3_POSITION",
                 "error": "Заголовок третьего уровня не может находиться перед заголовком второго уровня",
