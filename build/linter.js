@@ -1,41 +1,26 @@
-/*const json = `{
-    "block": "grid",
-    "mods": {
-        "m-columns": "12"
-    },
+const json = `{
+    "block": "warning",
     "content": [
         {
-            "block": "grid",
-            "elem": "fraction",
-            "elemMods": {
-                "m-col": "2"
-            },
-            "content": [
-                {
-                    "block": "payment"
-                }
-            ]
+            "block": "placeholder",
+            "mods": { "size": "m" }
         },
         {
-            "block": "grid",
-            "elem": "fraction",
-            "elemMods": {
-                "m-col": "8"
-            },
+            "elem": "content",
             "content": [
                 {
                     "block": "text",
-                    "mods": { "type": "h3" }
+                    "mods": { "size": "m" }
                 },
                 {
                     "block": "text",
-                    "mods": { "type": "h2" }
+                    "mods": { "size": "l" }
                 }
             ]
         }
     ]
- }`;
-lint(json);*/
+}`;
+lint(json);
 
 function lint(string) {
     let object = JSON.parse(string);
@@ -58,31 +43,27 @@ function lintMain(object, errors, string, headers, textInfo){
             if(object.mods) {
                 errors = lintGrid(object.content, object.mods['m-columns'], errors, string);
             }
-            object.content.forEach(item=> {
-                error = lintMain(item, errors, string, headers, textInfo);
-            })
             break;
         case 'text': 
             errors = lintText(object, headers, errors, string);
             break;
-        default:
-            if(Array.isArray(object.content)) {
-                object.content.forEach(item => {
-                    error = lintMain(item, errors, string, headers, textInfo);
-                });
+    }
+    if(Array.isArray(object.content)) {
+        object.content.forEach(item => {
+            error = lintMain(item, errors, string, headers, textInfo);
+        });
+    }
+    else {
+        if(typeof(object.content) === 'object') {
+            for(key in object.content) {
+                error = lintMain(object.content[key], errors, string, headers, textInfo);
             }
-            else {
-                if(typeof(object.content) === 'object') {
-                    for(key in object.content) {
-                        error = lintMain(object.content[key], errors, string, headers, textInfo);
-                    }
-                }
-                if(Array.isArray(object)) {
-                    object.forEach(item => {
-                        error = lintMain(item, errors, string, headers, textInfo);
-                    });
-                }
-            }
+        }
+        if(Array.isArray(object)) {
+            object.forEach(item => {
+                error = lintMain(item, errors, string, headers, textInfo);
+            });
+        }
     }
     return errors;
 }
