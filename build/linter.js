@@ -1,13 +1,40 @@
-/*const json = `[
-    {
-        "block": "text",
-        "mods": { "type": "h3" }
+/*const json = `{
+    "block": "grid",
+    "mods": {
+        "m-columns": "12"
     },
-    {
-        "block": "text",
-        "mods": { "type": "h2" }
-    }
-]`;
+    "content": [
+        {
+            "block": "grid",
+            "elem": "fraction",
+            "elemMods": {
+                "m-col": "2"
+            },
+            "content": [
+                {
+                    "block": "payment"
+                }
+            ]
+        },
+        {
+            "block": "grid",
+            "elem": "fraction",
+            "elemMods": {
+                "m-col": "8"
+            },
+            "content": [
+                {
+                    "block": "text",
+                    "mods": { "type": "h3" }
+                },
+                {
+                    "block": "text",
+                    "mods": { "type": "h2" }
+                }
+            ]
+        }
+    ]
+ }`;
 lint(json);*/
 
 function lint(string) {
@@ -16,7 +43,7 @@ function lint(string) {
     let headers = {h1: false, h2: false};
     let textInfo = {firstBlock: false, firstText: false, textSize: false};
     errors = lintMain(object, errors, string, headers, textInfo);
-    //console.log(errors);
+    console.log(errors);
     return errors;
 }
 
@@ -28,7 +55,12 @@ function lintMain(object, errors, string, headers, textInfo){
             })
             break;
         case 'grid':
-            errors = lintGrid(object.content, object.mods['m-columns'], errors, string);
+            if(object.mods) {
+                errors = lintGrid(object.content, object.mods['m-columns'], errors, string);
+            }
+            object.content.forEach(item=> {
+                error = lintMain(item, errors, string, headers, textInfo);
+            })
             break;
         case 'text': 
             errors = lintText(object, headers, errors, string);
