@@ -2,6 +2,10 @@
     {
         "block": "text",
         "mods": { "type": "h3" }
+    },
+    {
+        "block": "text",
+        "mods": { "type": "h2" }
     }
 ]`;
 lint(json);*/
@@ -12,21 +16,7 @@ function lint(string) {
     let headers = {h1: false, h2: false};
     let textInfo = {firstBlock: false, firstText: false, textSize: false};
     errors = lintMain(object, errors, string, headers, textInfo);
-    if(!headers.h1) {
-        for(let i = 0; i < errors.length; i++) {
-            if(errors[i].code == 'TEXT.INVALID_H2_POSITION') {
-                errors.splice(i, 1);
-            }
-        }
-    }
-    if(!headers.h2) {
-        for(let i = 0; i < errors.length; i++) {
-            if(errors[i].code == 'TEXT.INVALID_H3_POSITION') {
-                errors.splice(i, 1);
-            }
-        }
-    }
-    console.log(errors);
+    //console.log(errors);
     return errors;
 }
 
@@ -41,7 +31,7 @@ function lintMain(object, errors, string, headers, textInfo){
             errors = lintGrid(object.content, object.mods['m-columns'], errors, string);
             break;
         case 'text': 
-            errors = lintText(object, headers, errors);
+            errors = lintText(object, headers, errors, string);
             break;
         default:
             if(Array.isArray(object.content)) {
@@ -65,15 +55,25 @@ function lintMain(object, errors, string, headers, textInfo){
     return errors;
 }
 
-function lintText(object, headers, errors){
+function lintText(object, headers, errors, str){
     if(object.mods.type === 'h1') {
         if(headers.h1) {
+            let lineStart;
+            let lineEnd = 1;
+            str.split('\n').forEach((item, i) => {
+                if(item.lastIndexOf('h1') !== -1) {
+                    lineStart = i - 1;
+                }
+            });
+            for(key in object) {
+                lineEnd++;
+            }
             errors.push({
                 "code": "TEXT.SEVERAL_H1",
                 "error": "Заголовок первого уровня на странице должен быть единственным",
                 "location": {
-                    "start": { "column": 1, "line": 1 },
-                    "end": { "column": 2, "line": 12 }
+                    "start": { "column": 1, "line": lineStart },
+                    "end": { "column": 2, "line": lineEnd + lineStart }
                 }
             });
         }
@@ -82,24 +82,50 @@ function lintText(object, headers, errors){
     if(object.mods.type === 'h2') {
         headers.h2 = true;
         if(!headers.h1) {
+            let lineStart;
+            let lineEnd = 1;
+            str.split('\n').forEach((item, i) => {
+                if(lineStart) {
+                    return;
+                }
+                if(item.indexOf('h2') !== -1) {
+                    lineStart = i - 1;
+                }
+            });
+            for(key in object) {
+                lineEnd++;
+            }
             errors.push({
                 "code": "TEXT.INVALID_H2_POSITION",
                 "error": "Заголовок второго уровня не может находиться перед заголовком первого уровня",
                 "location": {
-                    "start": { "column": 1, "line": 1 },
-                    "end": { "column": 2, "line": 12 }
+                    "start": { "column": 1, "line": lineStart },
+                    "end": { "column": 2, "line": lineStart + lineEnd }
                 }
             });
         }
     }
     if(object.mods.type === 'h3') {
         if(!headers.h2) {
+            let lineStart;
+            let lineEnd = 1;
+            str.split('\n').forEach((item, i) => {
+                if(lineStart) {
+                    return;
+                }
+                if(item.indexOf('h3') !== -1) {
+                    lineStart = i - 1;
+                }
+            });
+            for(key in object) {
+                lineEnd++;
+            }
             errors.push({
                 "code": "TEXT.INVALID_H3_POSITION",
                 "error": "Заголовок третьего уровня не может находиться перед заголовком второго уровня",
                 "location": {
-                    "start": { "column": 1, "line": 1 },
-                    "end": { "column": 2, "line": 12 }
+                    "start": { "column": 1, "line": lineStart },
+                    "end": { "column": 2, "line": lineStart + lineEnd }
                 }
             });
         }
